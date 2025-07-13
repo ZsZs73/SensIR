@@ -1,0 +1,202 @@
+#######################################################################
+# Substitutions - use like $substitution_key or ${substitution_key}
+#######################################################################
+substitutions:
+  # Project Name, upper/lowercase characters, digits and underscores.
+  # Used as: hostname, mdns name, folder name
+  device_name: 'easymeterq3a'
+  device_description: "Read SML data from power consumption meters"
+
+  # Used as: AP SSID, Common (Wifi, Uptime, Switch) Sensors
+  friendly_name: 'Power consumption meter'
+
+#######################################################################
+# Log levels
+#######################################################################
+
+logger:
+  level: DEBUG
+  baud_rate: 0
+  logs:
+#    mqtt.component: DEBUG
+#    mqtt.client: ERROR
+    sensor: INFO
+    sml: INFO
+
+#######################################################################
+# Device config
+#######################################################################
+esphome:
+  name: "${device_name}"
+  comment: '${device_description}'
+  project:
+    name: "zszs73.easymeterq3a"
+    version: "0.1.0"
+
+esp8266:
+  restore_from_flash: true
+  board: esp12e
+
+# WiFi credentials #
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain:  !secret wifi_domain
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: '${device_name} Fallback AP'
+    password: !secret wifi_fallback_ap_password    
+# power saving mode modes are inconsistent: https://github.com/esphome/issues/issues/1532
+  power_save_mode: high  # this means no power saving
+
+captive_portal:
+preferences:
+  flash_write_interval: 3min
+
+# Enable ESPHome API (to receive logs)
+api:
+  encryption:
+    key: !secret api_enc_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+safe_mode: 
+    reboot_timeout: 10min
+    num_attempts: 5
+
+#optional
+web_server:
+  port: 80
+  auth:
+    username: !secret web_username
+    password: !secret web_password
+    
+uart:
+  id: uart_bus
+  rx_pin:
+    number: RX
+    inverted: true
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+#  debug: 
+
+status_led:
+  pin:
+    number: GPIO2
+    inverted: true
+# info: https://esphome.io/components/status_led.html
+
+sml:
+  id: mysml
+  uart_id: uart_bus
+
+# These sensors provide static data about the meter
+text_sensor:
+  - platform: sml
+    name: "${device_name} Meter VendorID" # Not sure if this is useful
+    sml_id: mysml
+    #server_id: !secret esphome_sml_server_id
+    #Change to your server ID as visiable fro the text debug console
+    obis_code: "129-129:199.130.3"
+    format: text
+  - platform: sml
+    name: "${device_name} Meter serial number"
+    sml_id: mysml
+    obis_code: "1-0:0.0.0"
+    format: text
+
+sensor:
+  - platform: sml
+    name: "${device_name} Consumed energy"
+    sml_id: mysml
+    obis_code: "1-0:1.8.0"
+    unit_of_measurement: kWh
+    accuracy_decimals: 7
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.0000001
+      - throttle: 10s # Send data every 10s only
+  - platform: sml
+    name: "${device_name} Exported energy"
+    sml_id: mysml
+    obis_code: "1-0:2.8.0"
+    unit_of_measurement: kWh
+    accuracy_decimals: 7
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.0000001
+      - throttle: 10s # Send data every 10s only
+  - platform: sml
+    name: "${device_name} Power"
+    sml_id: mysml
+    obis_code: "1-0:16.7.0"
+    unit_of_measurement: kW
+    accuracy_decimals: 3
+    device_class: power
+    state_class: measurement
+    filters:
+      - multiply: 0.00001
+  - platform: sml
+    name: "${device_name} L1 Power"
+    sml_id: mysml
+    obis_code: "1-0:36.7.0"
+    unit_of_measurement: W
+    accuracy_decimals: 1
+    device_class: energy
+    filters:
+      - multiply: 0.01
+  - platform: sml
+    name: "${device_name} L2 Power"
+    sml_id: mysml
+    obis_code: "1-0:56.7.0"
+    unit_of_measurement: W
+    accuracy_decimals: 1
+    device_class: energy
+    filters:
+      - multiply: 0.01
+  - platform: sml
+    name: "${device_name} L3 Power"
+    sml_id: mysml
+    obis_code: "1-0:76.7.0"
+    unit_of_measurement: W
+    accuracy_decimals: 1
+    device_class: energy
+    filters:
+      - multiply: 0.01
+  - platform: sml
+    name: "${device_name} L1 Voltage"
+    sml_id: mysml
+    obis_code: "1-0:32.7.0"
+    unit_of_measurement: V
+    accuracy_decimals: 1
+    device_class: voltage
+    state_class: measurement
+    filters:
+      - multiply: 0.1
+  - platform: sml
+    name: "${device_name} L2 Voltage"
+    sml_id: mysml
+    obis_code: "1-0:52.7.0"
+    unit_of_measurement: V
+    device_class: voltage
+    accuracy_decimals: 1
+    state_class: measurement
+    filters:
+      - multiply: 0.1
+  - platform: sml
+    name: "${device_name} L3 Voltage"
+    sml_id: mysml
+    obis_code: "1-0:72.7.0"
+    unit_of_measurement: V
+    device_class: voltage
+    accuracy_decimals: 1
+    state_class: measurement
+    filters:
+      - multiply: 0.1
