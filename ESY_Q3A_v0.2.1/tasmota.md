@@ -10,6 +10,7 @@ Navigate to the ip address in a new browser window. The main page of the tasmota
 Navigate to Configuration / Module
 - Select Generic (0)
 - Select D4 GPIO02: 'LedLink_i'
+
 Configuring GPIO02 as LedLink_i turns the blue LED on the ESP12 module:
 - on during boot
 - blink until the Wifi and MQTT (if configured) connections are established
