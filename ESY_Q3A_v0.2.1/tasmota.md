@@ -1,9 +1,11 @@
-Connect to the failback AP started by tasmota FW: tasmota-AABBCC-DDEE
-Wifimaganer is waiting for 3 minutes for connection 
-Navigate to 192.168.4.1 (default ip address for tasmota failback AP)
-Select your IoT Wifi AP to connect to and enter password
+# Setup
+Connect to the failback AP started by tasmota FW: tasmota-AABBCC-DDEE. 
+Wifimaganer is waiting for 3 minutes for connection. 
+Navigate to 192.168.4.1 (default ip address for tasmota failback AP).
+Select your IoT Wifi AP to connect to and enter password.
 The device will reboot and connect to yout IoT WiFi network. Check your DHCP leases log on your WiFi AP/Router in order to get the assigned ip address.
 
+## Setup the device
 Navigate to the ip address in a new browser window. The main page of the tasmota should show up 'Sonoff Basic', Tasmota
 Navigate to Configuration / Module
 - Select Generic (0)
@@ -15,6 +17,9 @@ Configuring GPIO02 as LedLink_i turns the blue LED on the ESP12 module:
 
 info: https://tasmota.github.io/docs/Lights/#status-leds
 Click Save, the device will reboot
+
+## Script
+This script wil read the SML data from pin RX and decode the data
 
 Navigate to Tools/Edit Script check 'Script enable' and paste the following (the line with # is important!):
 ```
@@ -39,3 +44,26 @@ Navigate to Tools/Edit Script check 'Script enable' and paste the following (the
 #
 ```
 then click Save
+
+# Set publishing interval
+via Console
+```
+TelePeriod 10
+```
+
+via script
+```
+tper=10
+```
+
+# Enable Serial debug
+Navigate to Tools/Console and enter the following command:
+```
+sensor53 d1
+```
+Diesble Serial debug
+```
+sensor53 d0
+```
+
+
